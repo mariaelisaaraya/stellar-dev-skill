@@ -370,4 +370,12 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "drQedwards/pmll",
     copyValue: "https://raw.githubusercontent.com/drQedwards/pmll/main/SKILL.md",
   },
+  {
+    title: "Pollar Wallets & Fiat Ramps",
+    description:
+      "Add embedded Stellar wallets and local fiat on/off-ramps to a web or React Native app with @pollar/core and @pollar/react. Users sign in with email, social or a passkey and get a funded account with no seed phrase. Covers ramp quotes and country availability, the custodial and external signing paths, payments, sponsored (gasless) activation and trustlines, multi-venue swaps, and SEP-53 / SEP-10 ownership proofs.",
+    pathLabel: "pollar-xyz/pollar",
+    copyValue:
+      "https://raw.githubusercontent.com/pollar-xyz/pollar/main/skills/pollar-wallet-auth/SKILL.md",
+  },
 ] as const;
