@@ -49,6 +49,15 @@ Install using the npx skills CLI:
 npx skills add https://github.com/stellar/stellar-dev-skill
 ```
 
+### OpenClaw
+
+Clone the repo and copy every skill into OpenClaw's shared skills directory:
+
+```
+git clone https://github.com/stellar/stellar-dev-skill
+mkdir -p ~/.openclaw/skills && cp -R stellar-dev-skill/skills/* ~/.openclaw/skills/
+```
+
 ### Clone repo
 
 Clone the repo and copy the skills directory to your agent's skills location:
@@ -70,13 +79,13 @@ The skills installed via the methods above, grouped by category.
 
 ### Agentic Payments
 
-- [Agent Payments (x402 + MPP)](https://skills.stellar.org/skills/agentic-payments/SKILL.md): Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs via OZ Channels facilitator, fee-sponsored clients) and MPP (Machine Payments Protocol) in both Charge mode (per-request SAC) and Session mode (channel-backed off-chain commits, high-frequency; formerly called Channel mode). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
+- [Agent Payments (x402 + MPP)](https://skills.stellar.org/skills/agentic-payments/SKILL.md): Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs through a facilitator, fee-sponsored clients; the guide configures OZ Channels) and MPP (Machine Payments Protocol) in both Charge mode (per-request SAC) and Session mode (channel-backed off-chain commits, high-frequency; formerly called Channel mode). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
   - [MPP — Machine Payments Protocol (Charge + Session)](https://skills.stellar.org/skills/agentic-payments/mpp.md)
   - [x402 — Paid APIs + Agent Buyer Clients](https://skills.stellar.org/skills/agentic-payments/x402.md)
 
 ### Frontend
 
-- [Frontend & Wallets](https://skills.stellar.org/skills/dapp/SKILL.md): Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts.
+- [Frontend & Wallets](https://skills.stellar.org/skills/dapp/SKILL.md): Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts. Blux is also an option.
   - [Client-Side Data Fetching](https://skills.stellar.org/skills/dapp/data-fetching.md)
   - [React & Next.js Patterns](https://skills.stellar.org/skills/dapp/react.md)
   - [Smart Accounts (Passkeys) & Fee Sponsorship](https://skills.stellar.org/skills/dapp/smart-accounts.md)
@@ -96,9 +105,10 @@ The skills installed via the methods above, grouped by category.
 
 ### Cross-Chain
 
-- [Cross-Chain (CCTP, Axelar)](https://skills.stellar.org/skills/cross-chain/SKILL.md): Cross-chain interoperability for Stellar. Entry point with a rail-selection decision table and shared pitfalls, routing to two companion files — cctp.md (Circle CCTP V2, native USDC burn-and-mint between Stellar and EVM/Solana chains, domain 27, the CctpForwarder requirement for Stellar recipients) and axelar.md (Axelar GMP for Soroban contracts calling contracts on other chains, and the Interchain Token Service for multichain tokens). Also covers NEAR Intents (intent-based cross-chain swaps into XLM or Stellar USDC) at the routing level. Use when bridging USDC to or from Stellar, sending messages between a Stellar contract and another blockchain, making a token exist on multiple chains, or adding cross-chain swaps to an app.
+- [Cross-Chain (CCTP, Axelar, LayerZero)](https://skills.stellar.org/skills/cross-chain/SKILL.md): Cross-chain interoperability for Stellar. Entry point with a rail-selection decision table and shared pitfalls, routing to three companion files — cctp.md (Circle CCTP V2, native USDC burn-and-mint between Stellar and EVM/Solana chains, domain 27, the CctpForwarder requirement for Stellar recipients), axelar.md (Axelar GMP for Soroban contracts calling contracts on other chains, and the Interchain Token Service for multichain tokens), and layerzero.md (LayerZero V2 OApp messaging with configurable DVN security, OFT omnichain tokens, and USDT0 — native USDT on Stellar). Also covers NEAR Intents (intent-based cross-chain swaps into XLM or Stellar USDC) at the routing level. Use when bridging USDC or USDT to or from Stellar, sending messages between a Stellar contract and another blockchain, making a token exist on multiple chains, or adding cross-chain swaps to an app.
   - [Axelar on Stellar — GMP and Interchain Tokens](https://skills.stellar.org/skills/cross-chain/axelar.md)
   - [CCTP V2 on Stellar — native USDC between chains](https://skills.stellar.org/skills/cross-chain/cctp.md)
+  - [LayerZero V2 on Stellar — omnichain messaging, OFT, and USDT0](https://skills.stellar.org/skills/cross-chain/layerzero.md)
 
 ### Ecosystem
 
@@ -113,7 +123,8 @@ Community-built skills maintained by their respective authors, not by SDF. Each 
 - [OpenZeppelin Contracts](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-skills/main/skills/setup-stellar-contracts/SKILL.md): Scaffold a Stellar smart contract project with OpenZeppelin's audited Stellar contract libraries. Walks through Rust toolchain setup, Stellar CLI install, workspace dependencies, and applying the pausable and ownable macros to your contract.
 - [DeFindex SDK](https://raw.githubusercontent.com/paltalabs/defindex-sdk/main/defindex-sdk-skill.md): Integrate DeFindex vaults on Stellar with the @defindex/sdk TypeScript package. Covers vault deposits and withdrawals, balance and APY queries, programmatic vault creation, and the unsigned-XDR signing pattern for backend and bot integrations.
 - [Soroswap SDK](https://raw.githubusercontent.com/soroswap/sdk/main/soroswap-sdk-skill.md): Trade on Soroswap DEX from a backend, bot, or swap widget using the @soroswap/sdk TypeScript package. Covers token swaps, liquidity pool operations, price and route queries, API key handling, and signing flows for both server keypairs and browser wallets.
-- [Trustless Work Escrow](https://raw.githubusercontent.com/Trustless-Work/trustless-work-dev-skill/main/SKILL.md): Build escrow and milestone-based payment workflows on Stellar with the Trustless Work platform. Covers single-release and multi-release escrows, trustline configuration, dispute handling, and three integration paths: REST API, React SDK hooks, and pre-built Blocks UI components.
+- [SODAX](https://www.sodax.com/skill.md): Build cross-network trading, lending, and asset transfers between Stellar and 20+ other networks with the @sodax/sdk TypeScript package. Covers intent quotes and status polling, Stellar trustline handling on source and destination, sponsored activation for new 0-XLM accounts, dapp-kit React hooks, and the Result error model.
+- [Trustless Work Escrow](https://raw.githubusercontent.com/Trustless-Work/trustlesswork-skill/main/trustless-work-dev/SKILL.md): Build escrow and milestone-based payment workflows on Stellar with the Trustless Work platform. Covers single-release and multi-release escrows, trustline configuration, dispute handling, and three integration paths: REST API, React SDK hooks, and pre-built Blocks UI components.
 - [Agent Browser WebAuthn](https://raw.githubusercontent.com/kalepail/skills/main/skills/agent-browser-webauthn/SKILL.md): Drive passkey and Stellar smart account browser tests with agent-browser and Chrome DevTools virtual WebAuthn authenticators.
 - [Anchors](https://raw.githubusercontent.com/CheesecakeLabs/stellar-anchor-skill/main/SKILL.md): Integrate with or build Stellar anchors (fiat on/off-ramps, deposits/withdrawals, KYC). Covers core SEP flows (1/6/10/12/24/31/38) and common integration pitfalls.
 - [Eunomia Bounded Agent Treasury](https://raw.githubusercontent.com/eunomia-finance/eunomia/main/SKILL.md): Give an AI agent a non-custodial, contract-bounded spending account on Stellar with Eunomia (formerly PRISM). Covers treasury deployment with per-payment and rolling daily limits, payee whitelists, time-bound agent session keys, escrow, x402-gated payments, and Groth16/BN254 ZK compliance proofs verified on-chain.
@@ -140,3 +151,8 @@ Community-built skills maintained by their respective authors, not by SDF. Each 
 - [Contextio SDK](https://raw.githubusercontent.com/Eras256/Contextio/main/packages/sdk/SKILL.md): Integrate contextio-sdk: verifiable, non-custodial legal context binding (Legal Context Protocol / LCP) for Stellar treasury and payroll. Covers Sign In With Stellar (SEP-53) wallet auth, reading a tenant's treasury/payroll/agent state, triggering an agent proposal, and independently hashing/verifying an LCP document against an on-chain hash.
 - [PMLL](https://raw.githubusercontent.com/drQedwards/pmll/main/SKILL.md): Gives AI agents persistent spatial memory so they can retain long-term context, form symbiotic memory layers, and maintain durable state across sessions; supports PPM-based context stitching, Context+ pipelines, and supermodeltools/cli for graphing and analysis. On-chain commitment anchoring on Stellar (32-byte hashes via a Soroban contract) is planned.
 - [Pollar Wallets & Fiat Ramps](https://raw.githubusercontent.com/pollar-xyz/pollar/main/skills/pollar-wallet-auth/SKILL.md): Add embedded Stellar wallets and local fiat on/off-ramps to a web or React Native app with @pollar/core and @pollar/react. Users sign in with email, social or a passkey and get a funded account with no seed phrase. Covers ramp quotes and country availability, the custodial and external signing paths, payments, sponsored (gasless) activation and trustlines, multi-venue swaps, and SEP-53 / SEP-10 ownership proofs.
+- [Stellar Registry](https://raw.githubusercontent.com/stellar-registry/cli/main/skills/stellar-registry/SKILL.md): Publish, deploy, and reuse named Soroban contracts through the Stellar Registry. Covers the `stellar registry` CLI (publish, deploy, create-alias, upgrade), the open `unverified/` channel for hackathon projects, and the `import_contract!`, `import_contract_client!`, and `import_asset!` macros for type-safe cross-contract calls to registry contracts, XLM, and other Stellar assets.
+- [Scopuly Wallet](https://raw.githubusercontent.com/Scopuly/scopuly-skills/main/skills/scopuly-wallet/SKILL.md): Connect Stellar dApps to Scopuly Mobile and its paired browser extension using the Provider API or Stellar Wallets Kit. Covers transaction signing, SEP-53 messages, Soroban authorization, account and network changes, and error handling.
+- [Blux](https://docs.blux.cc/SKILLS.md): Bring Web2 users to Stellar with passkey, OAuth, email, or wallet login. Customize the UI, then use wagmi-style React hooks and JavaScript functions to read balances, call Soroban contracts, and send transactions.
+- [Wasit](https://raw.githubusercontent.com/wasit-dev/wasit/main/skills/wasit/SKILL.md): Protocol-compliance testing for x402 and MPP on Stellar. Runs the real payment flow against a live service, then verifies settlement independently on Stellar RPC from the token contract's own transfer event rather than the service's own response. Ships as a CLI and an MCP server, with every check mapped to a written spec clause in a published catalogue.
+- [CosmosPay](https://raw.githubusercontent.com/CosmosPay/cosmospay-skill/main/SKILL.md): Integrate Stellar checkout and wallet flows with @cosmosapp/pay_sdk. Covers SEP-7 payment intents, browser wallet approval, server-side transaction validation, signed webhooks, and secure patterns for swaps, liquidity and fiat ramps.
