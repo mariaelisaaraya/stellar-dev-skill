@@ -76,6 +76,19 @@ First non-custodial lending protocol on Stellar with flash loan support.
 - **Features**: Pool-based strategy, sTokens, dTokens, utilization caps
 - **Oracle**: SEP-40 compatible (Reflector)
 
+#### XOXNO Lending
+Money market on Stellar with a hub-and-spoke architecture: one central liquidity pool and a controller that orchestrates everything. An NFT is the position (collateral and debt together) and can be transferred between wallets. Health factor is per NFT; one user can hold an unlimited number of NFTs. Live on mainnet and testnet.
+
+**Load the skill** when the task names XOXNO Lending or a distinctive identifier: `rs-lending-xlm`, hub/spoke, `HubAssetKey`, position NFT, `flash_position` (vs `flash_loan`), `@xoxno/sdk-js` `stellar-lending`, `xoxno-contract-sdk`, `api.xoxno.com/stellar-lending`, or `stellar-swap.xoxno.com`. Fetch [skills/xoxno-lending/SKILL.md](https://raw.githubusercontent.com/XOXNO/rs-lending-xlm/main/skills/xoxno-lending/SKILL.md) and follow its routing table.
+
+- **Use Case**: Supply, borrow, leverage, collateral and debt swaps, flash loans, liquidations
+- **GitHub**: https://github.com/XOXNO/rs-lending-xlm
+- **Docs**: [overview](https://xoxno.com/docs/stellar-lending/overview), [llms.txt](https://xoxno.com/llms.txt). Developer guides: [App integration](https://xoxno.com/docs/stellar-lending/dev/wallet-integration) (`@xoxno/sdk-js`), [Integrator API](https://xoxno.com/docs/stellar-lending/dev/integrator-api) (v1 REST routes, no API key), [Contract SDK](https://xoxno.com/docs/stellar-lending/dev/contract-sdk) (`xoxno-contract-sdk`)
+- **Types / API spec**: `@xoxno/sdk-js` (`stellar-lending`) is fully typed TypeScript. Lending REST: Swagger UI at [api.xoxno.com](https://api.xoxno.com/) (`GET /swagger.json`); the testnet root is `https://testnet-api.xoxno.com` (no Swagger UI). Swap quotes and XDR: Swagger UI at [stellar-swap.xoxno.com](https://stellar-swap.xoxno.com/) (`GET /api-docs/openapi.json`)
+- **Rust SDK**: `xoxno-contract-sdk` ([crates.io](https://crates.io/crates/xoxno-contract-sdk)) calls the protocol from a Soroban contract. Its `testutils` feature adds `LendingFixture`, which deploys the lending contracts and mock oracles in a test `Env`.
+- **License / audit**: `xoxno-contract-sdk` is [MIT](https://github.com/XOXNO/xoxno-contract-sdk/blob/main/LICENSE). The protocol contract source (`rs-lending-xlm`) uses [PolyForm Noncommercial 1.0.0](https://github.com/XOXNO/rs-lending-xlm/blob/main/LICENSE); commercial use of that source needs a written agreement with XOXNO. No audit report is listed.
+- **Entry point (mainnet)**: lending — `controller` `CAUCMIN5KSXEVZ7NMXR3LZATGD5EFIEUI5XWTFLYRO2R5OTXI22WE5JX` (not the pool). Swaps — aggregator router `CCVENFSVCBYDHVOACFZXMNNYVOZ3LKXPZYU5LUI4N7KTXOKRVYD7F3TR`. Testnet IDs differ; resolve the testnet controller and router, plus hubs, spokes, listed markets, and every other address on either network, from [addresses.md](https://github.com/XOXNO/rs-lending-xlm/blob/main/skills/xoxno-lending/addresses.md), generated from `configs/networks.json` — re-check before hard-coding.
+
 ### DEXs & AMMs
 
 #### Soroswap
@@ -109,6 +122,16 @@ Yield aggregation and vault infrastructure by PaltaLabs.
 - **Use Case**: Tokenized vaults, yield strategies, DeFi abstraction
 - **Docs**: https://docs.defindex.io
 - **Features**: Automated rebalancing, vault management, Blend integration
+
+#### Spectra Finance
+Fixed-rate yield markets: splits a yield-bearing asset into a Principal Token (PT) and a Yield Token (YT). Live on Stellar mainnet; Stellar markets accept XLM and USDC and swap them into the market asset first.
+- **Use Case**: Lock a fixed rate (buy PT), trade future yield (YT)
+- **App**: https://app.spectra.finance/fixed-rate?network=stellar
+- **Docs**: https://docs.spectra.finance/docs/stellar
+- **Developer docs**: https://dev.spectra.finance/docs/stellar (Core v2 integration, router and limit orders, IBT wrappers, PT bridge, oracle)
+- **Mainnet contracts**: https://dev.spectra.finance/docs/technical-reference/deployed-contracts#stellar-mainnet (Registry, PT Factory, Router, Limit Order Engine, PT Bridge, PT Oracle Factory)
+- **Features**: Core v2 on Soroban, PT/YT limit orders, Blend wrapper (Blend positions as vault shares), PT bridge to EVM, deterministic zero-coupon-bond PT oracle
+- **Caveat**: PT market deployment is permissionless. Registry membership is discovery data, not an allowlist.
 
 ### Stablecoins & CDPs
 
@@ -230,6 +253,13 @@ Cloud execution environment for blockchain data processing.
 - **Use Case**: Indexing, monitoring, automation
 - **Features**: Self-hostable, ledger-close execution
 
+#### Stellar Prices API
+REST API with USD and XLM prices for assets traded on SDEX and Soroban AMMs, by Rumble Fish.
+- **Website**: https://sorobanscan.rumblefish.dev/prices-api/
+- **Docs**: https://sorobanscan.rumblefish.dev/prices-api/docs
+- **Use Case**: Current prices, OHLCV candles, batch price lookups
+- **Features**: 24h cross-venue VWAP (SDEX, Soroswap, Aquarius, Phoenix, SushiSwap), Reflector oracle readings, free API key via Discord
+
 ### Contract Libraries
 
 #### OpenZeppelin Stellar Contracts
@@ -300,6 +330,16 @@ Cross-chain oracle with 20,000+ asset support.
 - **Website**: https://diadata.org
 - **Blog**: https://www.diadata.org/blog/post/soroban-stellar-oracle-dia/
 - **Features**: VWAPIR methodology, custom feeds
+
+#### Chainlink
+Data Feeds and Data Streams live on Stellar (October 2026).
+- **Docs**: https://docs.chain.link/data-feeds/stellar
+- **Feed IDs**: https://docs.chain.link/data-feeds/price-feeds/addresses?network=stellar (select Stellar)
+- **Proxy (mainnet)**: `CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ`
+- **Proxy (testnet)**: `CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4`
+- **Interface**: not SEP-40. One proxy serves every feed; select a feed by its 32-byte `data_id`. `latest_round(data_id, decimals)` and `get_round(data_id, round_id, decimals)` return `Round { round_id, answer: I256, timestamp }`. Answers are stored at 18 decimals; pass `18` unless Chainlink approved a lower precision. Interface source: https://github.com/smartcontractkit/chainlink-stellar
+- **Example**: BTC/USD `data_id` `01a0b4d920000332000000000000000000000000000000000000000000000000` (same on testnet and mainnet)
+- **Data Streams**: pull model; verify signed reports on-chain with the Chainlink Verifier contract. Needs an allowlisted account. Guide: https://docs.chain.link/data-streams/tutorials/stellar-onchain-report-verification
 
 #### Band Protocol
 Cross-chain data oracle on BandChain.
