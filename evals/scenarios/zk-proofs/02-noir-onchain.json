@@ -4,8 +4,9 @@
   ],
   "query": "I have a Noir circuit that proves age >= 18. Verify the proof on-chain on Stellar.",
   "expected_behavior": [
-    "States that Noir's UltraHonk/BN254 output verifies on-chain via the community rs-soroban-ultrahonk verifier, and that it needs Protocol 26+ (CAP-0074 base ops plus CAP-0080 MSM/Fr host functions)",
-    "Flags the verifier's maturity (young, community-maintained — check audit status before mainnet)",
+    "States that Noir's UltraHonk/BN254 output verifies on-chain via the community rs-soroban-ultrahonk verifier, which uses CAP-0074 base ops plus CAP-0080 MSM/Fr host functions, and that its current release (soroban-sdk 28) needs Protocol 28+, not just Protocol 26+",
+    "Generates proofs with the verifier's pinned tooling (Nargo 1.0.0-beta.9 + Barretenberg 0.87.0) and passes --oracle_hash keccak to bb, without --zk",
+    "Flags the verifier's maturity: OpenZeppelin audited an earlier commit, not the release revision, so review the gap before mainnet",
     "Warns that the verifier accepts only non-ZK UltraHonk proofs, so the proof does not hide the private age input, and does not recommend it for privacy-sensitive circuits until it supports the ZK flavor",
     "Does not hand-roll a fake UltraHonk verifier contract from scratch",
     "Offers the alternatives with tradeoffs: re-express the statement as a Circom Groth16 circuit, or the attestation-oracle pattern with its trust assumption stated explicitly"
