@@ -284,7 +284,7 @@ pub fn transfer(env: Env, from: Address, to: Address, amount: i128) -> Result<()
 }
 ```
 
-- Returning `Result` gives callers typed errors: generated clients expose both `foo()` (panics on error) and `try_foo()` returning `Result<Result<T, E>, InvokeError>` — `Ok(Err(e))` is your typed error, outer `Err` is a host-level failure (budget, bad auth, type mismatch).
+- Returning `Result` gives callers typed errors: generated clients expose both `foo()` (panics on error) and `try_foo()` returning `Result<Result<T, _>, Result<E, InvokeError>>`. `Err(Ok(e))` is your typed error. `Err(Err(_))` is an `InvokeError`: a panic or host-level failure (bad auth, type mismatch), or an error code your `E` does not define. `Ok(Err(_))` means the return value failed to convert to `T`. If `foo` does not return `Result`, `E` is `soroban_sdk::Error`, so host failures arrive as `Err(Ok(_))`. Budget exhaustion and footprint violations are not recoverable, so `try_` cannot catch them. In tests: `assert_eq!(client.try_transfer(&from, &to, &0), Err(Ok(ContractError::InvalidAmount)));`
 - When panicking, use `panic_with_error!(&env, Error::X)`, not bare `panic!("msg")` — bare panics surface as opaque host errors clients can't match on.
 - Error codes are public ABI. Never renumber across upgrades.
 - An `Err` return or panic rolls back **all** state changes of the invocation, including nested calls' writes.
@@ -329,16 +329,20 @@ Custom token implementations, asset issuance, and SAC deployment: `../assets/SKI
 Decide early whether the contract is mutable. If yes, gate the upgrade behind admin/governance auth and track versions:
 
 ```rust
+use soroban_sdk::ContractExecutable;
+
 contractmeta!(key = "binver", val = "1.0.0");
 
 pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) {
     let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
     admin.require_auth();
-    env.deployer().update_current_contract_wasm(new_wasm_hash);
+    env.deployer()
+        .update_current_contract(ContractExecutable::Wasm(new_wasm_hash));
 }
 ```
 
 - Upload the new WASM first (`stellar contract upload`), pass its hash here. The contract address and all storage survive; only the executable changes. `__constructor` does not re-run.
+- `update_current_contract` takes a `ContractExecutable` since `soroban-sdk` 28 (CAP-85). The older `update_current_contract_wasm(hash)` still works but is deprecated.
 - **Storage schema is your problem.** New code reading an old key with a changed `#[contracttype]` shape fails to decode. Patterns: store a schema version and branch on it; add enum variants rather than reshaping existing ones; ship an idempotent, admin-gated `migrate` entrypoint enforcing `new_version > current_version`.
 - SEP-0049 standardizes upgradeable-contract interfaces; OpenZeppelin's [stellar-contracts](https://github.com/OpenZeppelin/stellar-contracts) ships audited implementations.
 
@@ -357,11 +361,12 @@ impl Factory {
         owner.require_auth();
         env.deployer()
             .with_address(env.current_contract_address(), salt)
-            .deploy_v2(wasm_hash, constructor_args)
+            .deploy_contract(ContractExecutable::Wasm(wasm_hash), constructor_args)
     }
 }
 ```
 
+- `deploy_contract` replaces the deprecated `deploy_v2` since `soroban-sdk` 28.
 - Addresses are deterministic per (deployer, salt) — `deployed_address()` computes one without deploying; derive salts intentionally.
 - Authorize who may deploy; emit an event per deployment so instances are indexable.
 - Keep factory logic separate from instance business logic.
@@ -391,12 +396,15 @@ Current mainnet per-transaction ceilings (network-configured, change by validato
 |---|---|
 | CPU instructions | 400M |
 | Memory | 40 MB |
-| Ledger entries read / written | 200 / 200 |
-| Bytes read / written | 200 KB / ~129 KB |
+| Footprint entries (read-only + read-write) | 400 |
+| Disk-read entries / written entries | 200 / 200 |
+| Disk-read bytes / written bytes | 200 KB / ~129 KB |
 | Transaction size | ~129 KB |
 | Contract events + return value | 16 KB |
 | Contract WASM size | 128 KB |
 | Ledger entry size (incl. whole instance storage) | 64 KB (keys 250 B) |
+
+Disk reads count classic entries (accounts, trustlines) in the footprint plus archived contract entries being restored. Live contract data and code are served from memory, so they count toward the 400 footprint entries but not the 200 disk reads.
 
 Optimization rules that actually move the needle:
 

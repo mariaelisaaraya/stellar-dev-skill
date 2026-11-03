@@ -159,7 +159,13 @@ const tx = new StellarSdk.TransactionBuilder(account, { fee: "100", networkPassp
 const sim = await rpc.simulateTransaction(tx);
 const prepared = StellarSdk.rpc.assembleTransaction(tx, sim).build();
 prepared.sign(keypair);
-const result = await rpc.sendTransaction(prepared);
+const sent = await rpc.sendTransaction(prepared);
+// Only PENDING and DUPLICATE mean the transaction is queued; fail the test otherwise.
+if (sent.status !== "PENDING" && sent.status !== "DUPLICATE") {
+  throw new Error(`sendTransaction returned ${sent.status}`, { cause: sent.errorResult });
+}
+const result = await rpc.pollTransaction(sent.hash);
+if (result.status !== "SUCCESS") throw new Error(`transaction ${result.status}`);
 ```
 
 In Rust, gate network-dependent tests behind `#[ignore]` and run them with `cargo test -- --ignored` in environments where the network is up.
@@ -243,9 +249,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: rustup target add wasm32v1-none
+      - uses: stellar/stellar-cli@v28.1.0   # the tag picks the CLI version
       - run: cargo test
-      - run: cargo build --release --target wasm32v1-none
+      - run: stellar contract build
 ```
+
+From `soroban-sdk` 28, `cargo build --target wasm32v1-none` stops with an error. Build Wasm with `stellar contract build` (stellar-cli v25.2.0+).
 
 For integration jobs, run `stellar/quickstart` as a service container and deploy with the CLI (`cargo install stellar-cli --locked`).
 
