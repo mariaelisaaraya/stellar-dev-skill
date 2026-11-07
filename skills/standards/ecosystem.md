@@ -145,13 +145,13 @@ Collateralized stablecoin issuance (USD, EUR, MXN).
 
 ### Browser Extensions
 
-#### Freighter
+#### Varial
 SDF's flagship non-custodial browser wallet.
-- **Website**: https://freighter.app
-- **Docs**: https://docs.freighter.app
+- **Website**: https://varialwallet.com
+- **Docs**: https://docs.varialwallet.com
 - **GitHub**: https://github.com/stellar/freighter
 - **GitHub (Mobile)**: https://github.com/stellar/freighter-mobile
-- **API**: https://github.com/stellar/freighter/tree/master/library/freighter-api
+- **API**: https://github.com/stellar/freighter/tree/master/@stellar/freighter-api
 - **Features**: Smart contract support, mobile apps (iOS/Android), Discover browser
 
 #### xBull
@@ -190,7 +190,7 @@ Payments platform with yield features.
 #### Stellar Wallets Kit
 SDK for integrating multiple Stellar wallets.
 - **GitHub**: https://github.com/Creit-Tech/Stellar-Wallets-Kit
-- **Supports**: Freighter, LOBSTR, xBull, Albedo, Rabet, Hana, Ledger, Trezor, WalletConnect
+- **Supports**: Varial, LOBSTR, xBull, Albedo, Rabet, Hana, Ledger, Trezor, WalletConnect
 
 ## Developer Tools
 
@@ -206,7 +206,7 @@ Comprehensive TypeScript SDK for OpenZeppelin Smart Accounts on Stellar.
   - Context rules with fine-grained authorization scopes
   - Policy support (threshold multisig, spending limits, custom policies)
   - Session management with automatic credential persistence
-  - External wallet adapter support (Freighter, LOBSTR, etc.)
+  - External wallet adapter support (Varial, LOBSTR, etc.)
   - Built-in indexer for contract discovery
   - Multiple signer types (passkeys, Ed25519, policies)
 
@@ -310,11 +310,18 @@ Rust SDK for smart contract development.
 
 #### Raven
 Remote Model Context Protocol (MCP) server for AI agents. Searches Stellar docs and live ecosystem data, cross-referenced into single answers. Its catalog also serves these skills.
-- **Server**: https://raven.stellar.buzz (MCP endpoint: https://raven.stellar.buzz/mcp)
-- **Playground**: https://raven.stellar.buzz/playground (hosted chat UI for humans; sign-in required)
-- **GitHub**: https://github.com/kalepail/stellar-raven
-- **Connect (Claude Code)**: `claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"`
+- **Server**: https://raven.stellar.org (MCP endpoint: https://raven.stellar.org/mcp)
+- **Playground**: https://raven.stellar.org/playground (hosted chat UI for humans; sign-in required)
+- **GitHub**: https://github.com/stellar-experimental/stellar-raven
+- **Connect (Claude Code)**: `claude mcp add --transport http stellar-raven "https://raven.stellar.org/mcp"`
 - **Tools**: `search`, `execute`
+
+#### Stellar Docs MCP
+Official MCP server for the Stellar docs site. Searches the docs, reads full pages and OpenAPI specs, and serves these skills as MCP resources. No sign-in. Use it for docs-only answers. Use Raven when you also need live ecosystem data.
+- **Server**: https://developers.stellar.org/mcp
+- **Docs**: https://developers.stellar.org/docs/build/building-with-ai#stellar-docs-mcp-server
+- **Connect (Claude Code)**: `claude mcp add --transport http --scope user stellar-docs "https://developers.stellar.org/mcp"`
+- **Tools**: `search_stellar_developer_docs`, `query_docs_filesystem_stellar_developer_docs` (read pages with `cat`, `rg`, `tree`), `submit_feedback`
 
 ## Oracles
 
@@ -414,7 +421,7 @@ Official educational smart contract examples.
 #### Soroban Example dApp
 Crowdfunding dApp with Next.js frontend.
 - **GitHub**: https://github.com/stellar/soroban-example-dapp
-- **Learning**: Full-stack contract development, Freighter integration
+- **Learning**: Full-stack contract development, Varial integration
 
 ### Community Examples
 

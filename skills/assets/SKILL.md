@@ -71,14 +71,15 @@ const usdc = new StellarSdk.Asset(
 import * as StellarSdk from "@stellar/stellar-sdk";
 
 const server = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
+const rpcServer = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
 
 // 1. Create issuing account (should be separate from distribution)
 const issuerKeypair = StellarSdk.Keypair.random();
 const distributorKeypair = StellarSdk.Keypair.random();
 
-// 2. Fund accounts (testnet)
-await fetch(`https://friendbot.stellar.org?addr=${issuerKeypair.publicKey()}`);
-await fetch(`https://friendbot.stellar.org?addr=${distributorKeypair.publicKey()}`);
+// 2. Fund accounts (testnet). fundAddress throws if funding fails.
+await rpcServer.fundAddress(issuerKeypair.publicKey());
+await rpcServer.fundAddress(distributorKeypair.publicKey());
 ```
 
 ### Issue Asset
@@ -128,7 +129,7 @@ await server.submitTransaction(issueTx);
 
 ### Lock Issuing Account
 
-For fixed-supply tokens, lock the issuer:
+For fixed-supply tokens, lock the issuer. Master weight 0 disables only the master key, so first remove any other signers (or confirm their combined weight can never meet the account's thresholds):
 
 ```typescript
 const lockTx = new StellarSdk.TransactionBuilder(issuerAccount, {
@@ -145,7 +146,7 @@ const lockTx = new StellarSdk.TransactionBuilder(issuerAccount, {
 
 lockTx.sign(issuerKeypair);
 await server.submitTransaction(lockTx);
-// Issuer can never issue more tokens
+// With no other signers, the issuer can never issue more tokens
 ```
 
 ## Asset Flags
@@ -376,12 +377,17 @@ pub fn transfer_asset(
 
 SAC implements the standard SEP-41 token interface:
 - `balance(id: Address) -> i128`
-- `transfer(from: Address, to: Address, amount: i128)`
-- `approve(from: Address, spender: Address, amount: i128, expiration_ledger: u32)`
+- `transfer(from: Address, to: MuxedAddress, amount: i128)`
+- `transfer_from(spender: Address, from: Address, to: Address, amount: i128)`
+- `approve(from: Address, spender: Address, amount: i128, live_until_ledger: u32)`
 - `allowance(from: Address, spender: Address) -> i128`
 - `decimals() -> u32`
 - `name() -> String`
-- `symbol() -> Symbol`
+- `symbol() -> String`
+
+Only `transfer` takes a `MuxedAddress` destination. The generated
+`TokenClient` accepts `impl Into<MuxedAddress>` there, so pass an `&Address`
+as `&to` (as above), never `&to.into()`, which fails to compile (E0283).
 
 ## When to Use What
 
@@ -415,14 +421,20 @@ SAC implements the standard SEP-41 token interface:
 > [setting a custom SAC admin](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)
 > for the pattern and `../cross-chain/layerzero.md` for that deployment.
 >
-> One hard prerequisite: **lock the issuer** (master key weight `0`).
-> Payments from a classic issuer are minting, so an unlocked issuer can mint
-> outside the contract and bypass the role model entirely.
+> One hard prerequisite: **lock the issuer account completely.** Payments
+> from a classic issuer are minting, so an unlocked issuer can mint outside
+> the contract and bypass the role model entirely. Master key weight `0`
+> disables only the master key: any other signers whose combined weight
+> meets the medium threshold can still issue, and signers meeting the high
+> threshold can restore the master key. So remove every other signer (or
+> confirm their combined weight can never meet the thresholds), as in
+> [Lock Issuing Account](#lock-issuing-account).
 >
 > **Do it in this order: `set_admin` first, then lock the issuer.** A SAC's
 > admin starts as the issuer account, and only the *current* admin can
-> authorize the first `set_admin`. Lock the issuer before that call and the
-> admin stays the locked issuer forever, because nobody can sign the handover
+> authorize the first `set_admin`. Lock the issuer completely before that
+> call and the admin stays the locked issuer forever, because no signer can
+> authorize the handover
 > ([SAC admin guide](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)).
 > After the handover the SAC still mints under the new admin, so lock the
 > issuer then.
@@ -546,5 +558,6 @@ Standard contract interface for NFTs on Stellar. Reference implementations avail
   mean balances can be frozen or clawed back. A contract SAC admin does not
   contain that power on its own: an issuer whose master key still signs can
   mint, freeze and claw back directly, whatever the admin contract allows. So
-  confirm the master key weight is `0`, then identify who holds the admin
-  contract's roles
+  confirm the master key weight is `0` and no other signers remain (or their
+  combined weight can never meet any threshold: freezing needs only the low
+  one), then identify who holds the admin contract's roles
